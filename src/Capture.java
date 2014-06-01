@@ -1,14 +1,16 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import org.apache.commons.httpclient.methods.PostMethod;
+import java.io.BufferedReader; 
+import java.io.IOException; 
+import java.io.InputStream; 
+import java.io.InputStreamReader; 
+import java.net.MalformedURLException; 
+import java.net.URL; 
+import java.net.URLConnection; 
+import org.apache.commons.httpclient.methods.PostMethod; 
 
-public class Capture
-{
+public class Capture { 
+	
+	public static boolean IS_BY_UTF_8 = true;
+	
 	/**
 	 * url对应的html页面的内容
 	 * @throws IOException 
@@ -64,6 +66,9 @@ public class Capture
 	 */
 	public String getCharSet(String url) throws IOException
 	{
+		if (IS_BY_UTF_8)
+			return "utf-8";
+
 		URLConnection uc = new URL(url).openConnection();
 		uc.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows XP; DigExt)");
 
