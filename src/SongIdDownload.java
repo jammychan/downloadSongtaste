@@ -16,23 +16,23 @@ public class SongIdDownload
 		String base = "http://huodong.duomi.com/songtaste/?songid=";
 		String varmp3 = "var mp3url = \"";
 		
+		// 多米下载的url
 		String mp3Url = base + id;
 			
 		//var mp3url = "http://mc.songtaste.com/201107120042/4a2d70251b92d3053f11ad9945309fd8/c/c2/c2eb5d84796df69a87fa80e01ee45975.mp3";
 
 		String downloadContent = c.getHtmlSource(mp3Url);
 			
+		// 获取mp3资源的uri
 		int start = downloadContent.indexOf(varmp3)+varmp3.length();
 		int end = start+downloadContent.substring(start).indexOf('"');
 		String url = downloadContent.substring(start, end);
 					
+		// 获取mp3的名字
 		start = downloadContent.indexOf("<title>")+7;
 		end = start+downloadContent.substring(start).indexOf("SongTaste");
 		String name = downloadContent.substring(start, end);
-		name = name.replaceAll("\n", "");
-		name = name.replaceAll("\t", "");
-		name = name.replaceAll("    ", "");
-		name = name.replaceAll("- ", "");
+		name = name.replaceAll("\n|\t|	|-| ", "");
 			
 		System.out.println(url+" "+name);
 		System.out.println("downloading...");
@@ -45,13 +45,14 @@ public class SongIdDownload
 	
 	public static void main(String[] args) throws IOException
 	{
-		System.out.println("input id:");
+		System.out.println("input id，0 to skip:");
 		
 		int id = 0;
 		Scanner input = new Scanner(System.in);
 		id = input.nextInt();
 	
-		SongIdDownload.downById(""+id);
+		if (id != 0)
+			SongIdDownload.downById(""+id);
 
 		/*
 		for (int i=0; i<args.length; i++)
