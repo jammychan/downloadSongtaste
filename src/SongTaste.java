@@ -1,65 +1,82 @@
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.Scanner;
 
-public class SongTaste
+public class SongsUrlDownload
 {
 	public static void main(String[] args) throws IOException
 	{
+		System.out.println("input url，enter to skip:");
+
+		// 输入下载的url
+		String url = null;
+		Scanner input = new Scanner(System.in);
+		url = input.nextLine();
+		if (null == url || url.length() == 0)
+			return;
+		
+		// 获取url的内容
 		Capture c = new Capture();
-		String s = c.getHtmlSource("http://www.songtaste.com/singer/282751/");
+		String htmlContent = c.getHtmlSource(url, "gb2312");
 //		System.out.println(s);
 		
-		//获取页面中所有歌曲的id和名字
-		HashMap<String, String> idToName = new HashMap<String, String>();
-		String name, id;
-		String[] ss = s.split("\n");
+		// 根据url特征判断开始key。
+		// http://www.songtaste.com/singer/282751/ 					每一行，WL(
+		// http://www.songtaste.com/singer.php?name=leaving...... 	每一行 WL(
+		// http://www.songtaste.com/user/album/a414634 				只有一行，WS(
+		// http://www.songtaste.com/user.php?uid=727193 			每一行 WS(
+		// http://www.songtaste.com/user/8502497/ 					每一行 WS(
+		// WL("1","2261263","★��一开头就听到鼻子酸酸的 每次＠听这歌听到哭 这女声太伤感了× ","120", "352482");
+		// WS("1","2261263","★��一开头就听到鼻子酸酸的 每次＠听这歌听到哭 这女声太伤感了× ","120", "352482");
+		String startKey = "WL(";
+		if (url.startsWith("http://www.songtaste.com/user/album"))
+			startKey = "<script>WS(";
+		else if (url.startsWith("http://www.songtaste.com/user"))
+			startKey = "WS(";
 		
-//		WL("1","2261263","★��一开头就听到鼻子酸酸的 每次＠听这歌听到哭 这女声太伤感了× ","120", "352482");
-		for (int i=0; i<ss.length; i++)
+		//获取页面中所有歌曲的id和名字，主要是id
+		String name, id;
+		String[] idAndNames = null;
+		ArrayList<String> idList = new ArrayList<String>();
+		ArrayList<String> nameList = new ArrayList<String>();
+		String[] lines = htmlContent.split("\n");
+		int num = 0;
+		for (int i=0; i<lines.length; i++)
 		{
-			String key = "WL(";
-			if (ss[i].startsWith(key))
+			if (lines[i].contains(startKey))
 			{
-				String[] songInfo = ss[i].split("\"");
-				id = songInfo[3];
-				name = songInfo[5];
-				idToName.put(id, name);
-//				System.out.println(id+" "+name);
+				// 每一行都包含一首歌的id
+				String split = startKey.substring(startKey.length()-3, startKey.length()-1);
+				idAndNames = lines[i].split(split);
+//				System.out.println(lines[i]);
+				for (String idName : idAndNames)
+				{
+					if (!idName.startsWith("("))
+						continue;
+					
+					String[] songInfo = idName.split("\"");
+					if (songInfo.length > 5)
+					{
+						id = songInfo[3];
+						name = songInfo[5];
+						try{
+							Integer.valueOf(id);
+							idList.add(id);
+							nameList.add(name);
+							System.out.println(""+num+++" \t"+id+" \t"+name);
+						}catch(Exception e){
+							// do nothing
+						}
+					}
+				}
 			}
 		}
 		
-		//下载所有歌曲,先再次抓取页面,获取mp3的url
-		//http://huodong.duomi.com/songtaste/?songid=2095353
-		String base = "http://huodong.duomi.com/songtaste/?songid=";
-		String mp3Url = "";
-		Set<String> keys = idToName.keySet();
-		String varmp3 = "var mp3url = \"";
-		int cou=0;
-		for (String key : keys)
+		System.out.println("there are " + idList.size() + " songs to download.");
+		for (int i=0; i<idList.size(); ++i)
 		{
-			mp3Url = base + key;
-//			System.out.println(mp3Url);
-			
-			//var mp3url = "http://mc.songtaste.com/201107120042/4a2d70251b92d3053f11ad9945309fd8/c/c2/c2eb5d84796df69a87fa80e01ee45975.mp3";
-			String downloadContent = c.getHtmlSource(mp3Url);
-			int start = downloadContent.indexOf(varmp3)+varmp3.length();
-			String url = downloadContent.substring(start,
-					start+downloadContent.substring(start).indexOf('"'));
-			
-			File f = null;
-			f = new File(idToName.get(key)+".mp3");
-//			f.exists();
-			Download.down(f, url);
-			System.out.println(""+cou+++" "+url);
+			System.out.println(""+i+" \t" + idList.get(i) + " \t" + nameList.get(i));
+			SongIdDownload.downById(idList.get(i));
 		}
 	}
-	
-	
 }

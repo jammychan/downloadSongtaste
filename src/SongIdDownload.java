@@ -40,7 +40,7 @@ public class SongIdDownload
 		f = new File(name+".mp3");
 		if (!f.exists())
 			Download.down(f, url);
-		System.out.println("Ok");
+		System.out.println("ok");
 	}
 	
 	public static void main(String[] args) throws IOException

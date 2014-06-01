@@ -11,15 +11,9 @@ public class Capture {
 	
 	public static boolean IS_BY_UTF_8 = true;
 	
-	/**
-	 * url对应的html页面的内容
-	 * @throws IOException 
-	 * */
-	public String getHtmlSource(String url) throws IOException
+	
+	public String getHtmlSource(String url, String charset) throws IOException
 	{
-		String charset = getCharSet(url);
-//		System.out.println("the encode is " +charset);
-
 		StringBuffer codeBuffer = null;
 		BufferedReader in = null;
 		try
@@ -57,6 +51,19 @@ public class Capture {
 
 		String temp = codeBuffer.toString();
 		return temp;
+	}
+	
+	
+	/**
+	 * url对应的html页面的内容
+	 * @throws IOException 
+	 * */
+	public String getHtmlSource(String url) throws IOException
+	{
+		String charset = getCharSet(url);
+//		System.out.println("the encode is " +charset);
+
+		return getHtmlSource(url, charset);
 	}
 	
 	/**
