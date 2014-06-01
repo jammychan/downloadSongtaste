@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<project name="DownloadSongtaste" default="run" basedir=".">
+	<path id="master-classpath">
+		<fileset dir="./lib/">
+			<include name="commons-httpclient-3.1.jar"/>  
+		</fileset>
+	</path>
+
+	<target name="run">
+		<java 
+			fork="true"
+			classname="SongIdDownload" 
+			classpath="bin" 
+		/>
+	</target>
+</project>
+
