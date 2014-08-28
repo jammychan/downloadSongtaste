@@ -12,5 +12,3 @@
 
 3、ant -f runDownloadByUrl.xml 按url批量下载
 
-night
-
